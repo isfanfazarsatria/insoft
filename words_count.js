@@ -1,0 +1,1 @@
+function countWords(text) {    var words = text.split(/\s+/);    return words.length;}// Contoh penggunaanvar inputText = "hitung jumlah katanya.";var wordCount = countWords(inputText);console.log("Jumlah kata:", wordCount);
