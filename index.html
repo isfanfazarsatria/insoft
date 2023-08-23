@@ -1,98 +1,146 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CRUD Example with API</title>
-    <!-- Load Bootstrap CSS from CDN -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CRUD Page</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
-
-<div class="container mt-4">
-    <h2>CRUD Example with API</h2>
+  <div class="container mt-5">
+    <h2 class="mb-4">CRUD Example</h2>
     
-    <!-- Form for Creating New Entry -->
-    <h3>Create New Entry</h3>
-    <form id="create-form">
-        <div class="form-group">
-            <label for="create-name">Name:</label>
-            <input type="text" class="form-control" id="create-name" name="name" required>
-        </div>
-        <div class="form-group">
-            <label for="create-price">Price:</label>
-            <input type="number" class="form-control" id="create-price" name="price" required>
-        </div>
-        <div class="form-group">
-            <label for="create-id-category">Category ID:</label>
-            <input type="number" class="form-control" id="create-id-category" name="id_category" required>
-        </div>
-        <div class="form-group">
-            <label for="create-unit">Unit:</label>
-            <input type="text" class="form-control" id="create-unit" name="unit" required>
-        </div>
-        <button type="submit" class="btn btn-primary">Create</button>
+    <form id="crudForm">
+      <div class="form-group">
+        <label for="name">Name</label>
+        <input type="text" class="form-control" id="name" name="name" required>
+      </div>
+      <div class="form-group">
+        <label for="price">Price</label>
+        <input type="number" class="form-control" id="price" name="price" required>
+      </div>
+      <div class="form-group">
+        <label for="category">Category</label>
+        <input type="text" class="form-control" id="category" name="category" required>
+      </div>
+      <div class="form-group">
+        <label for="unit">Unit</label>
+        <input type="text" class="form-control" id="unit" name="unit" required>
+      </div>
+      <button type="submit" class="btn btn-primary">Add</button>
     </form>
     
-    <!-- Display Existing Entries -->
-    <h3>Existing Entries</h3>
-    <ul id="entries" class="list-group">
-        <!-- Entries will be displayed here -->
-    </ul>
-</div>
+    <table class="table mt-4">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Price</th>
+          <th>Category</th>
+          <th>Unit</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="productTableBody">
+        <!-- Table rows will be added dynamically using JavaScript -->
+      </tbody>
+    </table>
+  </div>
 
-<!-- Load Bootstrap JS and jQuery from CDN -->
-<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    const form = document.getElementById('crudForm');
+    const tableBody = document.getElementById('productTableBody');
+    const baseUrl = "https://api.jwddata.com/api_recruit/api";
+    const token = "496e736f66745f417369615f54656b6e6f6c6f6769"; // Ganti dengan token otentikasi yang sesuai
 
-<script>
-    const apiUrl = {
-        create: 'https://api.jwddata.com/api_recruit/api/create',
-        read: 'https://api.jwddata.com/api_recruit/api/get_barang',
-        update: 'https://api.jwddata.com/api_recruit/api/edit_barang',
-        delete: 'https://api.jwddata.com/api_recruit/api/delete_barang'
+    const headers = {
+      Authorization: `Bearer ${token}`
     };
 
-    // Function to fetch and display entries
-    function fetchEntries() {
-        $.get(apiUrl.read, function(data) {
-            $("#entries").empty();
-            data.forEach(function(entry) {
-                $("#entries").append(`<li class="list-group-item">${entry.name} - ${entry.price} <button class="btn btn-danger btn-sm float-right delete-btn" data-id="${entry.id}">Delete</button></li>`);
-            });
-        });
-    }
-    
-    // Initial fetch of entries
-    fetchEntries();
-    
-    // Create new entry
-    $("#create-form").submit(function(event) {
-        event.preventDefault();
-        
-        const name = $("#create-name").val();
-        const price = $("#create-price").val();
-        
-        $.post(apiUrl.create, { name, price }, function() {
-            fetchEntries();
-            $("#create-name").val("");
-            $("#create-price").val("");
-        });
-    });
-    
-    // Delete an entry
-    $(document).on("click", ".delete-btn", function() {
-        const id = $(this).data("id");
-        $.ajax({
-            url: `${apiUrl.delete}/${id}`,
-            method: "DELETE",
-            success: function() {
-                fetchEntries();
-            }
-        });
-    });
-</script>
+    form.addEventListener('submit', async function(event) {
+      event.preventDefault();
 
+      const name = document.getElementById('name').value;
+      const price = document.getElementById('price').value;
+      const category = document.getElementById('category').value;
+      const unit = document.getElementById('unit').value;
+
+      try {
+        const response = await axios.post(`${baseUrl}/create`, { name, price, id_category: category, unit }, { headers });
+        const product = response.data;
+
+        const newRow = document.createElement('tr');
+        newRow.innerHTML = `
+          <td>${product.name}</td>
+          <td>${product.price}</td>
+          <td>${product.id_category}</td>
+          <td>${product.unit}</td>
+          <td>
+            <button class="btn btn-primary" onclick="editProduct(${product.id})">Edit</button>
+            <button class="btn btn-danger" onclick="deleteProduct(${product.id})">Delete</button>
+          </td>
+        `;
+
+        tableBody.appendChild(newRow);
+        form.reset();
+      } catch (error) {
+        console.error(error);
+      }
+    });
+
+    async function fetchAndPopulateData() {
+      try {
+        const response = await axios.get(`${baseUrl}/get_barang`, { headers });
+        const products = response.data;
+
+        products.forEach(product => {
+          const newRow = document.createElement('tr');
+          newRow.innerHTML = `
+            <td>${product.name}</td>
+            <td>${product.price}</td>
+            <td>${product.id_category}</td>
+            <td>${product.unit}</td>
+            <td>
+              <button class="btn btn-primary" onclick="editProduct(${product.id})">Edit</button>
+              <button class="btn btn-danger" onclick="deleteProduct(${product.id})">Delete</button>
+            </td>
+          `;
+
+          tableBody.appendChild(newRow);
+        });
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    async function deleteProduct(productId) {
+      try {
+        await axios.delete(`${baseUrl}/delete_barang/${productId}`, { headers });
+        const rowToDelete = document.querySelector(`tr[data-id="${productId}"]`);
+        rowToDelete.remove();
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    async function editProduct(productId) {
+      const newName = prompt("Enter new name:");
+      const newPrice = prompt("Enter new price:");
+      const newCategory = prompt("Enter new category:");
+      const newUnit = prompt("Enter new unit:");
+
+      if (newName && newPrice && newCategory && newUnit) {
+        try {
+          await axios.put(`${baseUrl}/edit_barang/${productId}`, { name: newName, price: newPrice, id_category: newCategory, unit: newUnit }, { headers });
+          location.reload(); // Reload the page to refresh data
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    }
+
+    fetchAndPopulateData();
+  </script>
 </body>
 </html>
